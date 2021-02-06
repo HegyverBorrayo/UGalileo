@@ -1,0 +1,42 @@
+endpointURL:products
+endpointMethod:GET
+	response:
+	 "products": [
+		{"name": Producto
+		"sku": Id del producto unico entre todos los productos,
+		"description:" Descripcion del producto},
+
+		{"name": Producto
+		"sku": Id del producto unico entre todos los productos,
+		"description:" Descripcion del producto}
+		]
+
+
+endpointURL:order
+endpointMethod:POST
+	request:
+	 "required_quantity": 10,
+	 "product_code": "ABC123",
+	 "client_type": Distributor,
+	 "client_slug": 'la-torre'
+
+
+	response:
+	 "id": "compra",
+	 "url": "de a quien le pregunte, para poder aprobar o rechazar la compra despues",
+	 "product_code": "ABC123",
+	 "status": "PENDING",
+	 "unit_price": 1,
+	 "required_quantity": 10,
+	 "manufacturer_quantity": 10,
+	 "total_price": 10
+
+
+endpointURL:order/{id}/accept-reject
+endpointMethod:POST
+	request:
+	 "order_id": 20,
+	 "status": ACCEPTED/REJECTED
+
+	resposne:
+	 "status": APPROVED/REJECTED
