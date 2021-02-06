@@ -1,0 +1,335 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Tutorial #1\n",
+    "## Calculando integrales propias.\n",
+    "$$\\int_a^b f(x) \\, dx$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# definimos la funcion que deseamos integrar.\n",
+    "def f(x):\n",
+    "    return x\n",
+    "\n",
+    "# usamos scipy para realizar aproximacion numerica.\n",
+    "import scipy.integrate as newton\n",
+    "\n",
+    "I, epsilon = newton.quad(f, 0, 1)\n",
+    "\n",
+    "print('Valor de la integral {} con error {}'.format(I, epsilon))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Ejemplo:\n",
+    "Calcular $\\int_{-3}^3 f(x) \\, dx$ para:\n",
+    "$$f(x) = \\begin{cases} -x & x < 0 \\\\ x^2 & x \\geq 0 \\end{cases} $$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# probamos con una funcion definida por partes\n",
+    "\n",
+    "def f(x):\n",
+    "    if x < 0:\n",
+    "        return -x\n",
+    "    else:\n",
+    "        return x**2\n",
+    "\n",
+    "import matplotlib.pyplot as plt \n",
+    "import numpy as np\n",
+    "\n",
+    "xx = np.linspace(-3, 3, 100)\n",
+    "ff = np.vectorize(f)\n",
+    "yy = ff(xx)\n",
+    "\n",
+    "plt.plot(xx, yy)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# valor de la integral\n",
+    "\n",
+    "I, epsilon = newton.quad(f, -3, 3)\n",
+    "print('Valor de la integral {} con error {}'.format(I, epsilon))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Calculando coeficientes de Fourier\n",
+    "\n",
+    "Observe que el argumento que recibe la función quad es una función, i.e. recibe una variable real $x$ y devuelve un valor $x$. Debemos tener especial cuidado con integrar expresiones del tipo:\n",
+    "$$ \\int_{-L}^L f(x) \\, \\sin \\left( \\frac{\\pi \\, n \\, x}{L} \\right) \\, dx $$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Calcularemos los coeficientes de Fourier para la función:\n",
+    "$$ f(x) = \\begin{cases} -x & -2 \\leq x < 0 \\\\ x & 0 \\leq x < 2 \\end{cases} \\qquad f(x + 4) = f(x)$$."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Iniciamos por definir la funcion.\n",
+    "\n",
+    "## Task1:\n",
+    "Utilice lo visto en clase para definir la función para todo x.\n",
+    "Verifique que su resultado es correcto desplegando una gr[afica de la funci[on]].\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "### Sol:\n",
+    "\n",
+    "def f(x):\n",
+    "    r = x % 4.0\n",
+    "    if r >= 2:\n",
+    "        return 4 - r\n",
+    "    else:\n",
+    "        return r\n",
+    "\n",
+    "xx = np.linspace(-8, 8, 100)\n",
+    "ff = np.vectorize(f)\n",
+    "yy = ff(xx)\n",
+    "\n",
+    "plt.plot(xx, yy)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Definimos parametros\n",
+    "L = 2\n",
+    "n = 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Note como esto no funciona\n",
+    "\n",
+    "I, epsilon = newton.quad(f(x)*np.cos(np.pi*n*x/L), -L, L)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Debemos construir una funcion que haga lo que necesitamos.\n",
+    "# Podemos usar una funcion explicita.\n",
+    "\n",
+    "def integrand(x):\n",
+    "    return f(x)*np.cos(np.pi*n*x/L)\n",
+    "\n",
+    "I, epsilon = newton.quad(integrand, -L, L)\n",
+    "print('Valor de la integral {} con error {}'.format(I, epsilon))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Podemos usar una funcion lambda\n",
+    "\n",
+    "integrand = lambda x: f(x)*np.cos(np.pi*n*x/L)\n",
+    "I, epsilon = newton.quad( integrand, -L, L )\n",
+    "print('Valor de la integral {} con error {}'.format(I, epsilon))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Podemos iterar sobre n para obtener todos los coeficientes que deseamos\n",
+    "N = 10 # Maximo numero de coeficientes.\n",
+    "for n in range(1, N+1):\n",
+    "    \n",
+    "    def integrand(x):\n",
+    "        return f(x)*np.cos(np.pi*n*x/L)\n",
+    "    \n",
+    "    I, epsilon = newton.quad(integrand, -L , L)\n",
+    "    print('a_{} = {} con error {}'.format(n, 1/L*I, epsilon))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Task 2\n",
+    "Despliegue las graficas del polinomio de Fourier de orden N y la funcion original.\n",
+    "Estime la norma del error:\n",
+    "$$ \\left\\| f(x) - a_0 - a_1 \\cos \\omega_1 \\, x - a_2 \\cos \\omega_2 \\, x - \\cdots - a_N \\cos \\omega_N \\,x \\right\\|^2$$\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# sol.\n",
+    "# podemos usar un arreglo diferente para hacerlos mas claro.\n",
+    "\n",
+    "N = 3\n",
+    "\n",
+    "# Empezamos por a_0\n",
+    "\n",
+    "I, epsilon = newton.quad(f, -L, L)\n",
+    "a_0 = 1.0/(2*L)*I\n",
+    "\n",
+    "def integrand(n, L, f):\n",
+    "    return lambda x: f(x)*np.cos(n*np.pi*x/L)\n",
+    "\n",
+    "coeficientes = [ 1/L*newton.quad(integrand(k, L, f), -L, L)[0] for k in range(1, N+1) ]\n",
+    "\n",
+    "xx = np.linspace(-L, L, 100)\n",
+    "\n",
+    "f_hat = lambda x: a_0 + sum([coeficientes[k]*np.cos(np.pi*(k+1)*x/L) for k in range(N)] )\n",
+    "\n",
+    "ff_hat = np.vectorize(f_hat)\n",
+    "\n",
+    "yy = ff_hat(xx)\n",
+    "\n",
+    "yy1 = ff(xx)\n",
+    "\n",
+    "plt.plot(xx, yy, color='red')\n",
+    "plt.plot(xx, yy1, color='green')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Estimacion del error\n",
+    "\n",
+    "delta2 = lambda x: (f(x) - f_hat(x))**2\n",
+    "\n",
+    "I, epsilon = newton.quad(delta2, -L, L)\n",
+    "\n",
+    "print('Error: {}'.format(np.sqrt(I)))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Tarea:\n",
+    "\n",
+    "Construya una función o procedimiento:\n",
+    "\n",
+    "Input: $N$, $L$, $f$ (funcion) periodica con periodo $L$.\n",
+    "Output: $a_0$, $a_1, \\dots , a_N$, $b_1, \\dots, b_n$.\n",
+    "\n",
+    "Construya un procedimiento que realice lo siguiente:\n",
+    "Input: $N$, $L$, $f$ (función) periodica con periodo $L$.\n",
+    "Output: Graficas del polinomio trigonometrico $\\hat{f}_N$ y $f$ en el intervalo $[-3L, 4L]$ y despliegue el error de aproximación."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.3"
+  },
+  "varInspector": {
+   "cols": {
+    "lenName": 16,
+    "lenType": 16,
+    "lenVar": 40
+   },
+   "kernels_config": {
+    "python": {
+     "delete_cmd_postfix": "",
+     "delete_cmd_prefix": "del ",
+     "library": "var_list.py",
+     "varRefreshCmd": "print(var_dic_list())"
+    },
+    "r": {
+     "delete_cmd_postfix": ") ",
+     "delete_cmd_prefix": "rm(",
+     "library": "var_list.r",
+     "varRefreshCmd": "cat(var_dic_list()) "
+    }
+   },
+   "types_to_exclude": [
+    "module",
+    "function",
+    "builtin_function_or_method",
+    "instance",
+    "_Feature"
+   ],
+   "window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

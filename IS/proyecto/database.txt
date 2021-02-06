@@ -1,0 +1,86 @@
+Create database proyectoIngdeSoft;
+use proyectoIngdeSoft;
+
+Create table Producto(
+	IdProducto int auto_increment,
+    sku varchar(12),
+    nombre varchar (200),
+    descripcion varchar(500),
+    precio_compra  float(10,2),
+    unidades_disponibles int,
+    primary key (IdProducto)
+);
+
+Create table Bodega(
+	IdBodega int auto_increment,
+    nombre varchar (200),
+    slot_totales int,
+    slot_disponibles int,
+    primary key (IdBodega)
+);
+
+Create table Compras(
+	IdCompras int auto_increment,
+    IdProducto int,
+    Unidades int, 
+    Fecha_compra date,
+    primary key (IdCompras),
+	foreign key(IdProducto) references Producto(IdProducto)
+);
+
+Create table Ingresos(
+	IdIngreso int auto_increment,
+    IdProducto int,
+    IdBodega int,
+    Unidades int,
+    Fecha_ingreso date,
+    primary key (IdIngreso),
+	foreign key(IdProducto) references Producto(IdProducto),
+	foreign key(IdBodega) references Bodega(IdBodega)
+);
+
+Create table DetalleBodega(
+	IdDetalleBodega int auto_increment,
+    IdProducto int,
+    Idbodega int,
+    Unidades_disponibles int,
+    primary key (IdDetalleBodega),
+	foreign key(IdProducto) references Producto(IdProducto),
+	foreign key(Idbodega) references Bodega(IdBodega)    
+);
+
+Create table Salidas(
+	IdSalida int auto_increment,
+    IdDetalleBodega int,
+    Unidades int,
+    Fecha_salida date,
+    primary key (IdSalida),
+	foreign key(IdDetalleBodega) references DetalleBodega(IdDetalleBodega)    
+);
+
+Create table Traslados(
+	IdTraslado int auto_increment,
+    IdDetalleBodega int,
+    IdBodegaNueva int,
+    Unidades int,
+    Fecha_traslado date,
+    primary key (IdTraslado),
+	foreign key(IdDetalleBodega) references DetalleBodega(IdDetalleBodega),
+	foreign key(IdBodegaNueva) references Bodega(IdBodega)
+);
+
+Create table Rol(
+	IdRol int auto_increment,
+    nombre varchar(200),
+    primary key (IdRol)
+);
+
+Create table Usuario(
+	IdUsuario int auto_increment,
+    nombre varchar (200),
+    user varchar(50),
+    password varchar (200),
+    IdRol int,
+    primary key (IdUsuario),
+	foreign key(IdRol) references Rol(IdRol)
+);

@@ -1,0 +1,32 @@
+Para crear, post en /bodega
+Para borrar, delete en /bodega/<id>
+Para ver todas, get en /bodega
+Para ver una, get en bodega/<id>
+Para modificar una, put o patch en /bodega/<id>
+
+/bodega/move/<source_id>
+{
+    "sku": sku
+    "quantity": quantity,
+    "destination": destination_id
+}
+
+/bodega/out/<id>
+{
+	"sku": sku,
+	"quantity": quantity
+}
+
+//AQUI SOLO VERIFICAMOS SI TENEMOS O NO EN LA CENTRAL. SI HAY SE DESPACHA, SI NO HAY SE DICE CUANTO HAY
+POST /bodega/request/<id>
+{
+    "sku": sku,
+    "quantity": quantity
+}
+
+//NOS PIDEN QUE COMPREMOS CIERTO PRODUCTO
+POST /bodega/purchase/<id>
+{
+	"sku": sku,
+	"quantity": quantity
+}
