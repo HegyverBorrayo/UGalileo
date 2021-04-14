@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(MASS)
+library(e1071)
+library(neuralnet)
+library(ISLR)
+```
+
+```{r}
+dataset<-Default
+dataset$index<-seq(1, nrow(dataset))
+dataset
+```
+```{r}
+dataYes<-dataset %>%
+  filter(default == "Yes")
+lenDataYes<-nrow(dataYes)
+
+dataNo<-dataset %>%
+  filter(default == "No")
+
+dataNoIndex<-sample(dataNo$index, 2*lenDataYes, replace = FALSE)
+dataNo<-dataset[dataNoIndex, ]
+
+dtaset<-rbind(dataYes, dataNo)
+shuffle<-sample(seq(1, nrow(dataset)), nrow(dataset), replace = FALSE)
+dataset<-dataset[shuffle,]
+dataset
+
+```
+
+##Data preparation
+```{r}
+dataset$b.Stand<-(dataset$balance - mean(dataset$balance))/sd(dataset$balance)
+dataset$i.Stand<-(dataset$income - mean(dataset$income))/sd(dataset$income)
+
+dataset$stud.cod<-ifelse(dataset$student == "No", 0, 1)
+
+dataset
+```
+#data Partirion
+```{r}
+index<-createDataPartition(dataset$default, p=0.7, list=FALSE)
+dataTrain<-dataset[index,]
+dataTest<-dataset[-index,]
+```
+
+
+```{r}
+n<-neuralnet(formula = default ~ b.Stand + i.Stand + stud.cod,
+             data=dataTrain,
+             err.fct= "ce",
+             linear.output =  FALSE,
+             hidden = 3)
+plot(n)
+```
+#predicciones con la red entrenada
+```{r}
+output<-compute(n, dataTest)
+salidaNet<-output$net.result
+colnames(salidaNet)<-c("No", "Yes")
+salidaNet
+
+predictANN<-colnames(salidaNet)[apply(salidaNet, which.max, MARGIN = 1)]
+predictANN
+```
+
+```{r}
+confusionMatrix(as.factor(dataTest$default), as.factor(predictANN), positive="Yes")
+```
+
+

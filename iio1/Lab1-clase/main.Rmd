@@ -1,0 +1,130 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+dataset<-read.csv("Advertising.csv", sep = ",")
+dataset
+```
+
+```{r}
+dataset<-dataset[ , 2:5]
+dataset
+```
+
+```{r}
+plot(dataset)
+```
+
+```{r}
+library(corrplot)
+corrplot(cor(dataset),
+         method = "number",
+         type = "upper")
+```
+$$ Sales = \beta_0 + \beta_1*TV $$
+```{r}
+lm1<-dataset %>%
+  lm(formula = Sales ~ TV)
+summary(lm1)
+```
+
+
+```{r}
+y.est<-predict(object = lm1,
+               newdata = dataset)
+y.est[1]
+```
+
+
+```{r}
+7.03259 + 0.47537*230.1
+```
+$$ \hat{Y} = `r lm1$coefficients[1]` + `r lm1$coefficients[2]`*(TV) $$
+
+```{r}
+residuos<-dataset$Sales - y.est
+summary(residuos)
+```
+
+
+```{r}
+summary(lm1)
+```
+
+
+```{r}
+dataset %>%
+  ggplot(aes(x=TV, y=Sales))+
+  geom_point(col="blue")+
+  theme_minimal()+
+  geom_abline(slope = lm1$coefficients[2], intercept = lm1$coefficients[1],
+              col="red", lwd=1)
+```
+
+
+```{r}
+lm2<-dataset %>%
+  lm(fornula = Sales ~ TV)
+```
+
+
+```{r}
+lm3<-dataset  %>%
+  lm(formula = Sales ~ Newspaper)
+summary(lm3)
+```
+
+
+```{r}
+lm4<-dataset %>%
+  lm(formula = Sales ~ Newspaper + Radio)
+summary(lm4)
+```
+
+
+```{r}
+index<-sample(1:nrow(dataset), 0.7*nrow(dataset), replace = F)
+dataTrain<-dataset[index, ]
+dataTest<-dataset[-index,]
+
+dataTest
+```
+
+
+```{r}
+dataPartition<-function(dataset, p=0.7){
+  index<-sample(1:nrow(dataset), p*nrow(dataset), replace =F)
+  dataTrain<-dataset[index, ]
+  dataTest<-dataset[-index,]
+  salida<-list(train=dataTrain, test=dataTest)
+  return (salida)
+}
+
+dataPartition(dataset)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+
+```{r}
+```
+

@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+inter<-c(1,3,7,10,9,5,4,8,2,6)
+finales<-c(3,2,8,7,9,6,5,10,1,4)
+
+df<-data.frame(inter=inter, finales=finales)
+df
+```
+#análisis estadístico
+```{r}
+summary(df)
+
+#estadisticamente los resultados son el mismo debido a que si nos percatamos son los mismos valores por lo cual no notaremos diferencias
+```
+
+#varianza
+```{r}
+var(df)
+```
+#correlacion
+```{r}
+cor(df)
+```
+#sd $inter
+```{r}
+sd(df$inter)
+```
+#sd $finales
+```{r}
+sd(df$finales)
+```
+#grafica densidad
+```{r}
+library(ggplot2)
+library(dplyr)
+
+df %>%
+  ggplot(aes(x=inter, y=..density..))+
+  geom_density(col="blue", lwd=1)
+```
+```{r}
+library(corrplot)
+corrplot(cor(df), method = 'number', type="upper")
+```
+
+#Muestre un diagrama de dispersión
+```{r}
+df %>%
+  ggplot(aes(x=inter, y=finales))+
+  geom_point(col="blue")+
+  theme_minimal()
+```
+
+#Calcule un modelo de regresión lineal donde la variable a predecir sea
+#Finales y la variable para para predecir sea Intermedios.
+```{r}
+#Pareciera que el intercepto no es estadisticamente significativo el intercepto y la pendiente es significativo pero no por completo debido a que tiene muy poca significancia
+
+modelo1<- df %>%
+  lm(formula = finales ~ inter)
+summary(modelo1)
+```
+#Realice la predicción para los siguientes valores intermedios: 12, 14 y 24
+```{r}
+predict(object = modelo1,
+        newdata = data.frame(inter=c(12,14,24)))
+```
+#Muestre una gráfica con el diagrama de dispersión y la recta de regresión que calculó.
+```{r}
+df %>%
+  ggplot(aes(x=inter, y=finales))+
+  geom_point(col="blue")+
+  theme_minimal()+
+  geom_abline(intercept = modelo1$coefficients[1], slope = modelo1$coefficients[2], col="red",
+              lwd=1)
+```
+

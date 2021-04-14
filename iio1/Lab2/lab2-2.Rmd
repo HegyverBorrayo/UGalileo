@@ -1,0 +1,121 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+#cargar el csv
+
+```{r}
+dataset<-read.csv("datasetlab2", sep = ",")
+dataset
+```
+#Realice un análisis preliminar de los datos (análisis estadístico y correlación), muestre un comentario sobre los estadísticos.
+```{r}
+summary(dataset)
+
+#Podemos decir que los datos que hemos obtenido son diferentes para todos y cada uno del dataset, por lo cual vamos a poder encontrar el valor mas pequenio, la media de anios que esta en 1982
+#y el valor mas grande
+```
+#varianza
+```{r}
+var(dataset)
+```
+
+#correlacion
+```{r}
+cor(dataset)
+```
+
+#sd Year
+```{r}
+sd(dataset$Year)
+```
+
+#sd $PIBN
+```{r}
+sd(dataset$PIBN)
+```
+
+#sd $PIBR
+```{r}
+sd(dataset$PIBR)
+```
+
+#grafica densidad
+```{r}
+
+dataset %>%
+  ggplot(aes(x=PIBR, y=..density..))+
+  geom_density(col="blue", lwd=1)
+```
+```{r}
+library(corrplot)
+corrplot(cor(dataset), method = 'number', type="upper")
+```
+#Muestre un diagrama de dispersión hasta antes de los 2000 (PIBN y PIBR)
+```{r}
+dataset2<-dataset[ 0:41,]
+dataset2 %>%
+  ggplot(aes(x=PIBN, y=PIBR))+
+  geom_point(col="blue")+
+  theme_minimal()
+```
+```{r}
+#Muestre un diagrama de dispersión hasta antes de los 2000 (PIBN y YEAR)
+
+
+dataset2 %>%
+  ggplot(aes(x=Year, y=PIBN))+
+  geom_point(col="blue")+
+  theme_minimal()
+
+```
+```{r}
+#Muestre un diagrama de dispersión hasta antes de los 2000 (PIBR y YEAR)
+
+
+dataset2 %>%
+  ggplot(aes(x=Year, y=PIBR))+
+  geom_point(col="blue")+
+  theme_minimal()
+
+```
+```{r}
+# Calcule un modelo de regresión lineal donde la variable a predecir sea el PIBR y la variable para para predecir sea el año
+modelo1<- dataset %>%
+  lm(formula = Year ~ PIBR)
+summary(modelo1)
+```
+#Realice un análisis y comentarios generales sobre el summary del modelo.
+#Recuerde analizar por lo menos la significancia local, global y el R^2 
+```{r}
+#Primero estamos obteniendo un valor de aceptable, por lo cual quiere decir que si funcina nuestro modelo
+#muy bien, por lo cual seria de ver si son las variables corrspondientes para evaluar ya que nos damos cuenta por medio de los interceptos
+
+```
+
+#Realice la predicción para los siguientes valores intermedios: 12, 14 y 24
+
+```{r}
+predict = predict(object = modelo1,
+        newdata = data.frame(inter=c(12,14,24)))
+```
+```{r}
+#Muestre una gráfica con el diagrama de dispersión y la recta de regresión que calculó
+dataset2 %>%
+  ggplot(aes(x=Year, y=PIBR))+
+  geom_point(col="red")+
+  theme_minimal()+
+  geom_abline(intercept = modelo1$coefficients[1], slope = modelo1$coefficients[2], col="black",
+              lwd=1)
+```
+
+```{r}
+
+```
+

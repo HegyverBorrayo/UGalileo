@@ -1,0 +1,270 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Cargando librerias para graficar
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+# Cargando el dataset
+```{r}
+dataset<-read.csv("Real_Estate.csv", sep = ",")
+x_dataset<-dataset[ , 3:5]
+y_dataset<-dataset[ , 8]
+dataset
+```
+### a) Realice un análisis estadístico (media, mediana, desviación y varianza)
+
+#### X4 number of convenience stores:
+```{r}
+x4<-dataset[ , 5]
+media <- mean(x4)
+mediana <- median(x4)
+varianza <- var(x4)
+desviacion <- sd(x4)
+paste0("Analisis estadistico: X4 number of convenience stores")
+paste0("media: ", media)
+paste0("mediana: ", mediana)
+paste0("varianza: ", varianza)
+paste0("desviacion: ", desviacion)
+```
+#### X3 distance to the nearest MRT station
+```{r}
+x3<-dataset[ , 4]
+media <- mean(x3)
+mediana <- median(x3)
+varianza <- var(x3)
+desviacion <- sd(x3)
+paste0("Analisis estadistico: X3 distance to the nearest MRT station")
+paste0("media: ", media)
+paste0("mediana: ", mediana)
+paste0("varianza: ", varianza)
+paste0("desviacion: ", desviacion)
+```
+#### X2 house age e Y house price of unit area.
+```{r}
+x2<-dataset[ , 3]
+media <- mean(x2)
+mediana <- median(x2)
+varianza <- var(x2)
+desviacion <- sd(x2)
+paste0("Analisis estadistico: X2 house age e Y house price of unit area")
+paste0("media: ", media)
+paste0("mediana: ", mediana)
+paste0("varianza: ", varianza)
+paste0("desviacion: ", desviacion)
+```
+#### Y.house.price.of.unit.area
+```{r}
+media <- mean(y_dataset)
+mediana <- median(y_dataset)
+varianza <- var(y_dataset)
+desviacion <- sd(y_dataset)
+paste0("Analisis estadistico: Y.house.price.of.unit.area")
+paste0("media: ", media)
+paste0("mediana: ", mediana)
+paste0("varianza: ", varianza)
+paste0("desviacion: ", desviacion)
+```
+### b) Muestre una gráfica de densidad e histograma en el mismo plot para las variables anteriores
+
+#### X4 number of convenience stores
+```{r}
+dataset %>%
+  ggplot(aes(x=x4, y=..density..))+
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(col="blue", lwd=1)
+```
+#### X3 distance to the nearest MRT station
+```{r}
+dataset %>%
+  ggplot(aes(x=x3, y=..density..))+
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(col="blue", lwd=1)
+```
+#### X2 house age e Y house price of unit area
+```{r}
+dataset %>%
+  ggplot(aes(x=x2, y=..density..))+
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(col="blue", lwd=1)
+```
+### c) Muestre una gráfica de correlación para las variables anteriores.
+```{r}
+library(corrplot)
+corrplot(cor(cbind(x_dataset, y_dataset)), method = 'number', type="upper")
+```
+
+### d) Muestre un diagrama de dispersión por cada una de las variables descriptivas donde Y sea la varaible Y house price of unit area y X sean las X4 number of convenience stores, X3 distance to the nearest MRT station y X2 house age.
+
+#### X4 number of convenience stores
+```{r}
+df_x4<-data.frame(x=x4, y=y_dataset)
+df_x4 %>%
+  ggplot(aes(x=x4, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()
+```
+#### X3 distance to
+the nearest MRT station
+```{r}
+df_x3<-data.frame(x=x3, y=y_dataset)
+df_x3 %>%
+  ggplot(aes(x=x3, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()
+```
+#### X2 house age
+```{r}
+df_x2<-data.frame(x=x2, y=y_dataset)
+df_x2 %>%
+  ggplot(aes(x=x2, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()
+```
+### e) Cree una tabla donde ordene todos los posibles modelos con las variables mencionadas X y la variable Y a predecir en función de la capacidad predictiva, es decir deberá analizar el summary() de cada uno de los modelos posible, tome en cuenta que estos son: los modelos individuales, los modelos de dos variables y el modelo de tres variables. De una conclusión sobre cual es el mejor modelo y por qué cree usted que es el mejor.
+```{r}
+lm_x4_y<-dataset %>%
+  lm(formula = y_dataset ~ x4)
+summary(lm_x4_y)
+
+lm_x4_x3_x2_y<-dataset %>%
+  lm(formula = y_dataset ~ x4 + x3 + x2)
+summary(lm_x4_x3_x2_y)
+
+lm_x4_x3_y<-dataset %>%
+  lm(formula = y_dataset ~ x4 + x3)
+summary(lm_x4_x3_y)
+
+lm_x4_x2_y<-dataset %>%
+  lm(formula = y_dataset ~ x4 + x2)
+summary(lm_x4_x2_y)
+
+lm_x3_y<-dataset %>%
+  lm(formula = y_dataset ~ x3)
+summary(lm_x3_y)
+
+lm_x3_x2_y<-dataset %>%
+  lm(formula = y_dataset ~ x3 + x2)
+summary(lm_x3_x2_y)
+
+lm_x2_y<-dataset %>%
+  lm(formula = y_dataset ~ x2)
+summary(lm_x2_y)
+
+#como conclusion yo podria decir que ningun modelo es bueno, ya que si analizamos todos tienen coeficientes muy grandes algunos en F-estadistico, algunos en valores estimados, pero en mi opinion el es mejor que todos estos seria el model de X3 + X2 ya que aqui nos dicta que tantos años de antiguedad tiene una casa, al analisar su R^2 0.4911 nos damos cuenta que es casi la mitad de nuestra varianza encontrada, por lo cual dada la cnatidad de datos es un valor aceptable, esto tambien analizando que son solo dos variables que se estan analizando, tambien al ver el Error residual nos damos cuenta que es de 9.73
+
+```
+### f) Para los modelos de una variable muestre un plot con el diagrama de dispersión y la recta de regresión.
+#### X4 number of convenience stores and Y house price of unit area
+```{r}
+dataset %>%
+  ggplot(aes(x=x4, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()+
+  geom_abline(slope = lm1$coefficients[2], intercept = lm_x4_y$coefficients[1],
+              col="red", lwd=1)
+
+```
+#### X3 distance to the nearest MRT station and Y house price of unit area
+```{r}
+dataset %>%
+  ggplot(aes(x=x3, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()+
+  geom_abline(slope = lm1$coefficients[2], intercept = lm_x3_y$coefficients[1],
+              col="red", lwd=1)
+
+```
+#### X2 house age and Y house price of unit area
+```{r}
+dataset %>%
+  ggplot(aes(x=x2, y=y_dataset))+
+  geom_point(col="blue")+
+  theme_minimal()+
+  geom_abline(slope = lm1$coefficients[2], intercept = lm_x2_y$coefficients[1],
+              col="red", lwd=1)
+
+```
+### setee un seed de 1234 y realice un split de 70% train y 30% test, luego de esto, calcule el RMSE para el bloque de test correspondiente, esto debe realizarlo para cada uno de los modelos creados anteriormente.
+```{r}
+set.seed(1234)
+
+dataPartition<-function(dataset, p=0.7){
+  index<-sample(1:nrow(dataset), p*nrow(dataset), replace =F)
+  dataTrain<-dataset[index, ]
+  dataTest<-dataset[-index,]
+  salida<-list(train=dataTrain, test=dataTest)
+  return (salida)
+}
+
+data_partition<-dataPartition(dataset)
+data_partition
+```
+
+#### X4
+```{r}
+predict = predict(object = lm_x4_y,
+        newdata = data.frame(x4))
+n<-NROW(x4)
+RMSE_x4<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x4
+```
+
+#### X4, X3, X2
+```{r}
+predict = predict(object = lm_x4_x3_x2_y,
+        newdata = data.frame(x4+x2+x3))
+n<-NROW(x_dataset)
+RMSE_x4_x3_x2<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x4_x3_x2
+```
+#### X4, x3
+```{r}
+predict = predict(object = lm_x4_x3_y,
+        newdata = data.frame(x3+x4))
+n<-NROW(x4)
+RMSE_x4<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x4
+```
+
+#### x4, x2
+```{r}
+predict = predict(object = lm_x4_x2_y,
+        newdata = data.frame(x2+x4))
+n<-NROW(x4)
+RMSE_x4<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x4
+```
+
+#### X3
+```{r}
+predict = predict(object = lm_x3_y,
+        newdata = data.frame(x3))
+n<-NROW(x3)
+RMSE_x3<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x3
+```
+
+
+#### X3, x2
+```{r}
+predict = predict(object = lm_x3_x2_y,
+        newdata = data.frame(x3+x2))
+n<-NROW(x3)
+RMSE_x3<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x3
+```
+
+
+#### x2
+```{r}
+predict = predict(object = lm_x2_y,
+        newdata = data.frame(x2))
+n<-NROW(x2)
+RMSE_x2<- sqrt(sum((y_dataset - predict)^2)/n)
+RMSE_x2
+```
