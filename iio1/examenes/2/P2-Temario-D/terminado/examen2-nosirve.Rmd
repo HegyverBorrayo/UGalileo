@@ -1,0 +1,174 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Cargando librerias
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(MASS)
+library(e1071)
+library(neuralnet)
+library(ISLR)
+library(corrplot)
+```
+
+#cargando dataset
+```{r}
+datasetno<-read.csv("data_fut.csv", sep = ",")
+datasetno
+```
+
+#Partición con el 70% de los datos
+```{r}
+
+datasetno<-datasetno %>%
+  filter(!is.na(Weight))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Acceleration))
+
+datasetno<-datasetno %>%
+  filter(!is.na(SprintSpeed))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Agility))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Reactions))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Balance))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Potential))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Jumping))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Stamina))
+
+datasetno<-datasetno %>%
+  filter(!is.na(Strength))
+
+datasetno<-datasetno %>%
+  filter(!is.na(LongShots))
+
+datasetno<-datasetno %>%
+  filter(Weight != "43+2")
+
+
+
+#limpiando height
+datasetno$Weight<-as.character(datasetno$Weight)
+datasetno$Weight<-gsub("lbs","",datasetno$Weight)
+datasetno$Weight<-as.character.numeric_version(datasetno$Weight)
+
+
+#limpiando datos height
+datasetno$Height<-as.character(datasetno$Height)
+datasetno$Height<-gsub("'",".",datasetno$Height)
+datasetno$Height<-as.character.numeric_version(datasetno$Height)
+
+#datasetTemporal<-datasetno
+#datasetno<-datasetTemporal
+
+datasetno<-na.omit(datasetno)
+
+#dataset$Height
+varcorplotno<-datasetno[,c("Weight","Acceleration",  "SprintSpeed", "Agility","Reactions","Balance" ,"Potential", "Jumping","Stamina", "Strength", "LongShots" , "Height")]
+
+#convirtiendo a numericos
+varcorplotno$Weight<-as.numeric(varcorplotno$Weight)
+varcorplotno$Acceleration<-as.numeric(varcorplotno$Acceleration)
+varcorplotno$SprintSpeed<-as.numeric(varcorplotno$SprintSpeed)
+varcorplotno$Agility<-as.numeric(varcorplotno$Agility)
+varcorplotno$Reactions<-as.numeric(varcorplotno$Reactions)
+varcorplotno$Balance<-as.numeric(varcorplotno$Balance)
+varcorplotno$Potential<-as.numeric(varcorplotno$Potential)
+varcorplotno$Jumping<-as.numeric(varcorplotno$Jumping)
+varcorplotno$Stamina<-as.numeric(varcorplotno$Stamina)
+varcorplotno$Strength<-as.numeric(varcorplotno$Strength)
+varcorplotno$LongShots<-as.numeric(varcorplotno$LongShots)
+varcorplotno$Height<-as.numeric(varcorplotno$Height)
+varcorplotno$Height<-varcorplotno$Height*12*2.54
+
+partitionno<-createDataPartition(varcorplotno$Weight, p = 0.7, list = FALSE)
+dataTrainno <- varcorplotno[partitionno, ]
+dataTestno <- varcorplotno[-partitionno, ]
+#solo positivos
+
+```
+
+
+```{r}
+#lm(formula = Weight ~ Acceleration+SprintSpeed+Agility+Reactions+Balance+Potential+Jumping+Stamina+Strength+LongShotsHeight)
+#lm(formula = Weight ~Agility+Reactions+Balance+Potential+Stamina+Strength+Height)
+modeloMejorno<- dataTrainno %>%
+  lm(formula = Weight ~ Acceleration+Reactions+Potential+Stamina+Height)
+summary(modeloMejorno)
+```
+
+
+```{r}
+#predicciones
+prediccionesno<-predict(object = modeloMejorno, newdata = dataTestno)
+varianzano<-mean((dataTestno$Weight - prediccionesno)^2)
+
+RMSE1no <- sqrt((sum(prediccionesno - dataTestno$Weight)^2)/nrow(dataTestno))
+RMSE1no
+```
+
+```{r}
+
+prueba<-read.csv("/home/erehebo/Downloads/test_data_B.csv", sep = ",")
+
+#prueba
+
+#Physical
+
+df2<-prueba[,c("Weight","Acceleration",  "SprintSpeed", "Agility","Reactions","Balance" ,"Potential", "Jumping","Stamina", "Strength", "LongShots" , "Height")]
+
+#df2
+
+dfcopy2 <- df2
+
+#Peso a numero
+dfcopy2$Weight<-gsub('lbs','',dfcopy2$Weight)
+dfcopy2 <- dfcopy2[dfcopy2$Weight != "43+2", ]
+
+dfcopy2$Weight<-as.numeric(dfcopy2$Weight)
+
+#Altura a numero
+dfcopy2$Height<-gsub('\'','.',dfcopy2$Height)
+dfcopy2$Height<-as.numeric(dfcopy2$Height)
+dfcopy2$Height<-dfcopy2$Height*12*2.54
+
+#Quitando valores nulos
+dfcopy2<-na.omit(dfcopy2)
+
+#dfcopy2
+
+pred_fhs2<-predict(object = modeloMejorno, newdata = dfcopy2)
+
+#pred_fhs2
+
+var_fhs2<-mean((dfcopy2$Weight - pred_fhs2)^2)
+#var_fhs2
+
+RMSE12 <- sqrt((sum(pred_fhs2 - dfcopy2$Weight)^2)/nrow(dfcopy2))
+RMSE12
+```
+
+```{r}
+test_dataset_predict <- predict(modeloMejorno,
+                                newdata = dataTestno)
+test_dataset_predict <- as.double(test_dataset_predict)
+answer_dataset <- cbind(dataTestno$Weight, test_dataset_predict)
+
+write.csv(answer_dataset, file = "pred_16004336.csv")
+```
+

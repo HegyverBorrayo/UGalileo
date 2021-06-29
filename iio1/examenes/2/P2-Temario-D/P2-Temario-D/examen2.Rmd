@@ -1,0 +1,229 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Cargando librerias
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(MASS)
+library(e1071)
+library(neuralnet)
+library(ISLR)
+library(corrplot)
+```
+
+#cargando dataset
+```{r}
+dataset<-read.csv("data_fut.csv", sep = ",")
+dataset
+```
+
+#Partición con el 70% de los datos
+```{r}
+#dataset<-dataset_sin_limpiar[!(is.na(dataset_sin_limpiar$Weight) |  dataset_sin_limpiar$Weight=="" | dataset_sin_limpiar$Weight=="N/A" | dataset_sin_limpiar$Weight=="null" | dataset_sin_limpiar$Weight=="NAs" | dataset_sin_limpiar$Weight=="NaN" | dataset_sin_limpiar$Weight=="NA" | dataset_sin_limpiar$Weight=="lbs"),]
+
+dataset<-dataset %>%
+  filter(!is.na(Weight))
+
+dataset<-dataset %>%
+  filter(!is.na(Acceleration))
+
+dataset<-dataset %>%
+  filter(!is.na(SprintSpeed))
+
+dataset<-dataset %>%
+  filter(!is.na(Agility))
+
+dataset<-dataset %>%
+  filter(!is.na(Reactions))
+
+dataset<-dataset %>%
+  filter(!is.na(Balance))
+
+dataset<-dataset %>%
+  filter(!is.na(Potential))
+
+dataset<-dataset %>%
+  filter(!is.na(Jumping))
+
+dataset<-dataset %>%
+  filter(!is.na(Stamina))
+
+dataset<-dataset %>%
+  filter(!is.na(Strength))
+
+dataset<-dataset %>%
+  filter(!is.na(LongShots))
+
+dataset<-dataset %>%
+  filter(Weight != "43+2")
+
+
+
+#limpiando height
+dataset$Weight<-as.character(dataset$Weight)
+dataset$Weight<-gsub("lbs","",dataset$Weight)
+dataset$Weight<-as.character.numeric_version(dataset$Weight)
+
+
+#limpiando datos height
+dataset$Height<-as.character(dataset$Height)
+dataset$Height<-gsub("'",".",dataset$Height)
+dataset$Height<-as.character.numeric_version(dataset$Height)
+
+datasetTemporal<-dataset
+#dataset<-datasetTemporal
+
+dataset<-na.omit(dataset)
+
+#dataset$Height
+varcorplot<-dataset[,c("Weight","ID","Acceleration",  "SprintSpeed", "Agility","Reactions","Balance" ,"Potential", "Jumping","Stamina", "Strength", "LongShots" , "Height")]
+
+#convirtiendo a numericos
+varcorplot$ID<-as.numeric(varcorplot$ID)
+varcorplot$Weight<-as.numeric(varcorplot$Weight)
+varcorplot$Acceleration<-as.numeric(varcorplot$Acceleration)
+varcorplot$SprintSpeed<-as.numeric(varcorplot$SprintSpeed)
+varcorplot$Agility<-as.numeric(varcorplot$Agility)
+varcorplot$Reactions<-as.numeric(varcorplot$Reactions)
+varcorplot$Balance<-as.numeric(varcorplot$Balance)
+varcorplot$Potential<-as.numeric(varcorplot$Potential)
+varcorplot$Jumping<-as.numeric(varcorplot$Jumping)
+varcorplot$Stamina<-as.numeric(varcorplot$Stamina)
+varcorplot$Strength<-as.numeric(varcorplot$Strength)
+varcorplot$LongShots<-as.numeric(varcorplot$LongShots)
+varcorplot$Height<-as.numeric(varcorplot$Height)
+varcorplot$Height<-varcorplot$Height*12*2.54
+
+partition<-createDataPartition(varcorplot$Weight, p = 0.7, list = FALSE)
+dataTrain <- varcorplot[partition, ]
+dataTest <- varcorplot[-partition, ]
+#solo positivos
+datasetp<-varcorplot[,c("Weight", "Strength",  "Height")]
+```
+
+#Plot de Data
+```{r}
+corrplot(cor(varcorplot), method = 'number', type="upper")
+```
+
+#Segun lo observado las variables que me ayudaran con mi modelo sera
+##Balance, Strength y Agilidad
+
+```{r}
+#Plot de Weight y Balance
+plot( varcorplot$Balance, varcorplot$Weight, pch=16, ylab = "Weight", xlab = "Balance")
+```
+```{r}
+#Plot de Weight y Strength
+plot( varcorplot$Strength, varcorplot$Weight, pch=16, ylab = "Weight", xlab = "Strength")
+```
+```{r}
+#Plot de Weight y Agilidad
+plot( varcorplot$Agility, varcorplot$Weight, pch=16, xlab = "Peso", ylab = "Agilidad")
+```
+
+```{r}
+n<-neuralnet(formula = Weight ~ Balance + Strength + Agility,
+             data=dataTrain,
+             err.fct= "sse",
+             linear.output =  FALSE,
+             hidden = 3)
+plot(n)
+```
+```{r}
+table(varcorplot$Weight)
+```
+```{r}
+modelofuerza<- dataTrain %>%
+  lm(formula = Weight ~ Strength)
+summary(modelofuerza)
+```
+```{r}
+modeloHeight<- dataTrain %>%
+  lm(formula = Weight ~ Height)
+summary(modeloHeight)
+```
+
+```{r}
+modeloHeightBalance<- dataTrain %>%
+  lm(formula = Weight ~ Height + Balance)
+summary(modeloHeightBalance)
+```
+```{r}
+modeloHBSA<- dataTrain %>%
+  lm(formula = Weight ~ Height + Balance + Stamina+ Agility)
+summary(modeloHBSA)
+```
+```{r}
+modeloHSA<- dataTrain %>%
+  lm(formula = Weight ~ Height +  Stamina+ Agility)
+summary(modeloHSA)
+```
+
+```{r}
+modeloHSA<- dataTrain %>%
+  lm(formula = Weight ~ Balance+ Agility +  Strength + SprintSpeed+ Height + Potential)
+summary(modeloHSA)
+```
+```{r}
+#lm(formula = Weight ~ Acceleration+SprintSpeed+Agility+Reactions+Balance+Potential+Jumping+Stamina+Strength+LongShotsHeight)
+modeloMejor<- dataTrain %>%
+  lm(formula = Weight ~ Acceleration+Reactions+Potential+Stamina+Height)
+summary(modeloMejor)
+```
+
+
+
+
+```{r}
+x <- seq(min(varcorplot$Weight), max(varcorplot$Weight), 1)
+y<-predict(object = modelo1,
+           newdata = dataTest)
+plot(x=dataTest$Strength, y=y, pch=16, col="blue", xlab = "Strength")
+```
+
+```{r}
+plot(x=dataTest$Strength+dataTest$Height, y=dataTest$Weight, pch=16, col="blue", xlab = "Strength + Height", ylab = "Weight")
+```
+
+```{r}
+modelo2<- dataTrain %>%
+  lm(formula = Weight ~ Balance + Agility)
+summary(modelo2)
+
+y2<-predict(object=modelo2,
+            newdata = dataTest)
+
+plot(x=dataTest$Balance + dataTest$Agility, y=y2, pch=16, xlab = "Balance + Agilidad")
+```
+
+```{r}
+plot(x=dataTest$Balance+dataTest$Agility, y=dataTest$Weight, pch=16, ylab = "Balance + Agilidad", xlab = "Weight")
+```
+
+```{r}
+plot(x=dataTest$Balance+dataTest$Agility, y=dataTest$Weight, pch=16, xlab = "Balance + Agilidad", ylab = "Weight")
+```
+
+```{r}
+#predicciones
+predicciones<-predict(object = modeloMejor, newdata = dataTest)
+varianza<-mean((dataTest$Weight - predicciones)^2)
+
+RMSE1 <- sqrt((sum(predicciones - dataTest$Weight)^2)/nrow(dataTest))
+RMSE1
+```
+
+```{r}
+tdp <- predict(modeloMejor, newdata = dataTest)
+tdp <- as.double(tdp)
+answer_dataset <- cbind( tdp)
+
+write.csv(answer_dataset, file = "pred_16004336.csv")
+
+```
+
