@@ -1,0 +1,9 @@
+1) Desde la perspectiva del programador, ¿Qué diferencias existen entre usar Sockets TCP y Sockets UDP?
+en tcp es canal y en udp son paquetes podriamos decir que "lo tira al aire" para quien lo cache
+
+2) ¿Qué hace el método accept() de un TCP ServerSocket?
+Acepta la conexion que esta entrando
+
+3) ¿Cuál es más confiable? y ¿Cuál es más rápido? escriba
+por qué llega a esa conclusión.
+Para mi el TCP es p2p en cambio UDP no
